@@ -32,6 +32,14 @@ variable_mapping = {
     "Percentage Difference": "Percentage_Change"
 }
 
+# Define the explicit order of age groups
+age_group_order = [
+    "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
+    "35-39", "40-44", "45-49", "50-54", "55-59", "60-64",
+    "65-69", "70-74", "75-79", "80-84", "85-89", "90-94",
+    "95-99", "100 & over"
+]
+
 # Filter data based on user input
 @st.cache_data
 def filter_data(df, sex, variable):
@@ -51,13 +59,16 @@ df_filtered = filter_data(df, sex, variable)
 
 # Get a list of unique years
 years = sorted(df_filtered["Year"].unique())
-age_groups = sorted(df_filtered["Age"].unique(), reverse=True)  # Ensure descending order
 
 # Add a slider for selecting the year
 selected_year = st.slider("Select Year", min_value=min(years), max_value=max(years), value=min(years))
 
 # Filter data for the selected year
 df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
+
+# Ensure all age groups are included
+df_selected_year["Age"] = pd.Categorical(df_selected_year["Age"], categories=age_group_order, ordered=True)
+df_selected_year = df_selected_year.sort_values("Age", ascending=False)  # Descending order
 
 # Create a population pyramid for the selected year
 def plot_population_pyramid(df, variable, year):
@@ -93,9 +104,7 @@ def plot_population_pyramid(df, variable, year):
         yaxis=dict(
             title="Age Group",
             categoryorder="array",
-            categoryarray=age_groups,  # Use the full list of age groups
-            tickmode="array",
-            tickvals=age_groups,  # Show all age groups
+            categoryarray=age_group_order,  # Explicit order of age groups
         ),
     )
 
