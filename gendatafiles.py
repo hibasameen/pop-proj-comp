@@ -1,26 +1,54 @@
 import pandas as pd
 
-# Reload the uploaded dataset
-file_path = "population_difference_2018_vs_2022.csv"
-df_difference = pd.read_csv(file_path)
+# File paths
+file_2022_path = "en_ppp_machine_readable.xlsx"  # Raw Excel file with population projections
 
-# Step 1: Prepare the 2018 dataset
-df_population_2018 = df_difference[["Year", "Age", "Sex", "Population_2018"]]
-df_population_2018.rename(columns={"Population_2018": "Population"}, inplace=True)
+# Load the Excel file
+xls = pd.ExcelFile(file_2022_path)
 
-# Step 2: Prepare the 2022 dataset
-df_population_2022 = df_difference[["Year", "Age", "Sex", "Population_2022"]]
-df_population_2022.rename(columns={"Population_2022": "Population"}, inplace=True)
+# Load the relevant sheet that contains the age group population projections
+df_2022_to_2060 = pd.read_excel(xls, sheet_name="Population_in_age_groups")
 
-# Step 3: Use the existing df_difference for population differences
+# Extract relevant columns for years 2022-2060
+columns_to_extract = ['Sex', 'Age'] + [year for year in range(2022, 2061)]
+df_2022_to_2060 = df_2022_to_2060[columns_to_extract]
 
-# Save the datasets to CSV
-file_2018 = "app/data/2018_projections.csv"
-file_2022 = "app/data/2022_projections.csv"
-file_difference = "app/data/population_difference_2018_vs_2022.csv"
+# Reshape data to long format
+df_2022_to_2060 = df_2022_to_2060.melt(id_vars=['Sex', 'Age'], var_name='Year', value_name='Population')
+df_2022_to_2060.columns = ['Sex', 'Age Group', 'Year', 'Population']
 
-df_population_2018.to_csv(file_2018, index=False)
-df_population_2022.to_csv(file_2022, index=False)
-df_difference.to_csv(file_difference, index=False)
+# Standardize age group labels
+df_2022_to_2060['Age Group'] = df_2022_to_2060['Age Group'].replace({
+    '100 - 104': '100-104',
+    '105 and over': '105 & over'
+})
 
-file_2018, file_2022, file_difference
+# Sum the population counts for "100-104" and "105 & over" into "100 & over"
+df_100_over = df_2022_to_2060[df_2022_to_2060['Age Group'].isin(['100-104', '105 & over'])]
+df_100_over = df_100_over.groupby(['Sex', 'Year'], as_index=False).agg({'Population': 'sum'})
+df_100_over['Age Group'] = '100 & over'
+
+# Remove the original "100-104" and "105 & over" rows
+df_2022_to_2060 = df_2022_to_2060[~df_2022_to_2060['Age Group'].isin(['100-104', '105 & over'])]
+
+# Append the new "100 & over" category
+df_2022_to_2060 = pd.concat([df_2022_to_2060, df_100_over], ignore_index=True)
+
+# Define the custom sorting order for age groups
+age_order = [
+    '0 - 4', '5 - 9', '10 - 14', '15 - 19', '20 - 24', '25 - 29', '30 - 34', 
+    '35 - 39', '40 - 44', '45 - 49', '50 - 54', '55 - 59', '60 - 64', '65 - 69', 
+    '70 - 74', '75 - 79', '80 - 84', '85 - 89', '90 - 94', '95 - 99', '100 & over'
+]
+
+# Convert age group to categorical type for correct sorting
+df_2022_to_2060['Age Group'] = pd.Categorical(df_2022_to_2060['Age Group'], categories=age_order, ordered=True)
+
+# Sort by Sex, Year, and Age Group
+df_2022_to_2060 = df_2022_to_2060.sort_values(by=['Sex', 'Year', 'Age Group'])
+
+# Save the final dataset
+output_file = "CleanedPopulationData2022_2060_Sorted.csv"
+df_2022_to_2060.to_csv(output_file, index=False)
+
+print(f"Processed data saved to {output_file}")
