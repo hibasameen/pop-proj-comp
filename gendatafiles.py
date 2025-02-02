@@ -15,21 +15,21 @@ df_2022_to_2060 = df_2022_to_2060[columns_to_extract]
 
 # Reshape data to long format
 df_2022_to_2060 = df_2022_to_2060.melt(id_vars=['Sex', 'Age'], var_name='Year', value_name='Population')
-df_2022_to_2060.columns = ['Sex', 'Age Group', 'Year', 'Population']
+df_2022_to_2060.columns = ['Sex', 'Age', 'Year', 'Population']
 
 # Standardize age group labels
-df_2022_to_2060['Age Group'] = df_2022_to_2060['Age Group'].replace({
+df_2022_to_2060['Age Group'] = df_2022_to_2060['Age'].replace({
     '100 - 104': '100-104',
     '105 and over': '105 & over'
 })
 
 # Sum the population counts for "100-104" and "105 & over" into "100 & over"
-df_100_over = df_2022_to_2060[df_2022_to_2060['Age Group'].isin(['100-104', '105 & over'])]
+df_100_over = df_2022_to_2060[df_2022_to_2060['Age'].isin(['100-104', '105 & over'])]
 df_100_over = df_100_over.groupby(['Sex', 'Year'], as_index=False).agg({'Population': 'sum'})
-df_100_over['Age Group'] = '100 & over'
+df_100_over['Age'] = '100 & over'
 
 # Remove the original "100-104" and "105 & over" rows
-df_2022_to_2060 = df_2022_to_2060[~df_2022_to_2060['Age Group'].isin(['100-104', '105 & over'])]
+df_2022_to_2060 = df_2022_to_2060[~df_2022_to_2060['Age'].isin(['100-104', '105 & over'])]
 
 # Append the new "100 & over" category
 df_2022_to_2060 = pd.concat([df_2022_to_2060, df_100_over], ignore_index=True)
@@ -42,10 +42,10 @@ age_order = [
 ]
 
 # Convert age group to categorical type for correct sorting
-df_2022_to_2060['Age Group'] = pd.Categorical(df_2022_to_2060['Age Group'], categories=age_order, ordered=True)
+df_2022_to_2060['Age'] = pd.Categorical(df_2022_to_2060['Age Group'], categories=age_order, ordered=True)
 
-# Sort by Sex, Year, and Age Group
-df_2022_to_2060 = df_2022_to_2060.sort_values(by=['Sex', 'Year', 'Age Group'])
+# Sort by Sex, Year, and Age
+df_2022_to_2060 = df_2022_to_2060.sort_values(by=['Sex', 'Year', 'Age'])
 
 # Save the final dataset
 output_file = "CleanedPopulationData2022.csv"
