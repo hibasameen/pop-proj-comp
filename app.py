@@ -54,14 +54,14 @@ def filter_data(df, sex, variable, dataset=None):
 
     return df_filled
 
-# Function to calculate the dynamic x-axis range for Chart 2
-def get_dynamic_x_axis_range(df):
-    min_value = df["Value"].min()
-    max_value = df["Value"].max()
+# Function to calculate global x-axis range for Chart 2
+def get_global_x_axis_range(df, variable):
+    global_min = df[variable].min()
+    global_max = df[variable].max()
 
-    # Add some padding to the range for better visualization
-    padding = (max_value - min_value) * 0.1
-    return [min_value - padding, max_value + padding]
+    # Add padding to ensure the bars are not too close to the edges
+    padding = (global_max - global_min) * 0.1
+    return [global_min - padding, global_max + padding]
 
 # Function to plot a population pyramid
 def plot_population_pyramid(df, variable, year):
@@ -105,8 +105,8 @@ def plot_population_pyramid(df, variable, year):
 
     return fig
 
-# Function to plot a population pyramid with a dynamic x-axis for Chart 2
-def plot_population_pyramid_dynamic(df, variable, year, sex):
+# Function to plot a population pyramid with a fixed global x-axis for Chart 2
+def plot_population_pyramid_fixed(df, variable, year, x_axis_range, sex):
     fig = go.Figure()
 
     # Dynamic labels for Persons
@@ -135,14 +135,11 @@ def plot_population_pyramid_dynamic(df, variable, year, sex):
         )
     )
 
-    # Calculate dynamic x-axis range
-    x_axis_range = get_dynamic_x_axis_range(df)
-
-    # Update layout to display all age groups and use dynamic x-axis range
+    # Update layout to display all age groups and use the fixed global x-axis range
     fig.update_layout(
         title=f"{variable} - Year {year}",
         barmode="overlay",
-        xaxis=dict(title=variable, range=x_axis_range),  # Dynamic x-axis range
+        xaxis=dict(title=variable, range=x_axis_range),  # Fixed global x-axis range
         yaxis=dict(
             title="Age Group",
             categoryorder="array",
@@ -179,10 +176,13 @@ variable_chart2 = st.sidebar.radio("Select Variable (Chart 2)", ["Population Dif
 sex_chart2 = st.sidebar.selectbox("Select Sex (Chart 2)", ["Males and Females (Combined)", "Persons"])
 selected_year_chart2 = st.slider("Select Year (Chart 2)", min_value=min(years_chart1), max_value=max(years_chart1))
 
+# Precompute global x-axis range for the selected variable
+x_axis_range_chart2 = get_global_x_axis_range(df, variable_chart2.replace(" ", "_"))
+
 # Filter and display chart 2
 df_chart2 = filter_data(df, sex_chart2, variable_chart2.replace(" ", "_"))
 df_selected_year_chart2 = df_chart2[df_chart2["Year"] == selected_year_chart2]
-fig_chart2 = plot_population_pyramid_dynamic(
-    df_selected_year_chart2, variable_chart2, selected_year_chart2, sex_chart2
+fig_chart2 = plot_population_pyramid_fixed(
+    df_selected_year_chart2, variable_chart2, selected_year_chart2, x_axis_range_chart2, sex_chart2
 )
 st.plotly_chart(fig_chart2, key="chart2")
