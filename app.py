@@ -112,7 +112,7 @@ def plot_animated_pyramid(df, variable, sex):
                         dict(
                             label="Pause",
                             method="animate",
-                            args=[[None], dict(frame=dict(duration=0, redraw=False)]],
+                            args=[[None], dict(frame=dict(duration=0, redraw=False))],  # Fixed closing bracket
                         ),
                     ],
                 )
