@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 @st.cache
 def load_data():
     # Replace with the correct file path
-    df = pd.read_csv("path/to/population_difference_2018_vs_2022.csv")
+    df = pd.read_csv("data/population_difference_2018_vs_2022.csv")
     return df
 
 df = load_data()
@@ -59,4 +59,71 @@ def plot_animated_pyramid(df, variable, sex):
             go.Frame(
                 data=[
                     go.Bar(
-                       
+                        x=df_year[df_year["Value"] < 0]["Value"],  # Males (negative)
+                        y=df_year[df_year["Value"] < 0]["Age"],
+                        orientation="h",
+                        name="Males",
+                        marker=dict(color="blue"),
+                    ),
+                    go.Bar(
+                        x=df_year[df_year["Value"] > 0]["Value"],  # Females (positive)
+                        y=df_year[df_year["Value"] > 0]["Age"],
+                        orientation="h",
+                        name="Females",
+                        marker=dict(color="red"),
+                    )
+                ],
+                name=str(year),
+            )
+        )
+
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=df[df["Value"] < 0]["Value"],
+                y=df[df["Value"] < 0]["Age"],
+                orientation="h",
+                name="Males",
+                marker=dict(color="blue"),
+            ),
+            go.Bar(
+                x=df[df["Value"] > 0]["Value"],
+                y=df[df["Value"] > 0]["Age"],
+                orientation="h",
+                name="Females",
+                marker=dict(color="red"),
+            )
+        ],
+        layout=go.Layout(
+            title=f"{variable} Over Time",
+            barmode="overlay",
+            xaxis=dict(title=variable),
+            yaxis=dict(title="Age Group", categoryorder="total ascending"),
+            updatemenus=[
+                dict(
+                    type="buttons",
+                    showactive=False,
+                    buttons=[
+                        dict(
+                            label="Play",
+                            method="animate",
+                            args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)],
+                        ),
+                        dict(
+                            label="Pause",
+                            method="animate",
+                            args=[[None], dict(frame=dict(duration=0, redraw=False)]],
+                        ),
+                    ],
+                )
+            ],
+        ),
+        frames=frames,
+    )
+    return fig
+
+# Display the interactive animation
+st.title("Animated Population Pyramid Visualization")
+st.write(f"Visualizing: **{variable}** for **{sex}**")
+fig = plot_animated_pyramid(df_filtered, variable, sex)
+st.plotly_chart(fig)
