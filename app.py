@@ -21,31 +21,14 @@ age_group_order = [
     "95-99", "100&over"
 ]
 
-# Sidebar for user input
-st.sidebar.title("Population Pyramid Visualizer")
-sex = st.sidebar.selectbox("Select Sex", ["Males and Females (Combined)", "Persons"])
-variable = st.sidebar.selectbox(
-    "Select Variable",
-    [
-        "Population (2018 Projections)",
-        "Population (2022 Projections)",
-        "Population Difference",
-        "Percentage Difference",
-    ]
-)
-
-# Map user-friendly variable names to dataset column names
-variable_mapping = {
-    "Population (2018 Projections)": "Population_2018",
-    "Population (2022 Projections)": "Population_2022",
-    "Population Difference": "Population_Difference",
-    "Percentage Difference": "Percentage_Change"
-}
-
-# Filter data based on user input
+# Function to filter data based on user input
 @st.cache_data
-def filter_data(df, sex, variable):
-    col_name = variable_mapping[variable]
+def filter_data(df, sex, variable, dataset=None):
+    if dataset:  # For Population Projections
+        col_name = f"Population_{dataset}"
+    else:  # For Difference/Percentage Change
+        col_name = variable
+
     if sex == "Persons":
         df_filtered = df[df["Sex"] == "persons"][["Year", "Age", col_name]].copy()
         df_filtered.rename(columns={col_name: "Value"}, inplace=True)
@@ -71,16 +54,7 @@ def filter_data(df, sex, variable):
 
     return df_filled
 
-df_filtered = filter_data(df, sex, variable)
-
-# Get a list of unique years
-years = sorted(df_filtered["Year"].unique())
-
-# Filter data for the selected year
-selected_year = min(years)  # Default to the first year initially
-df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
-
-# Create a population pyramid for the selected year
+# Function to plot a population pyramid
 def plot_population_pyramid(df, variable, year):
     fig = go.Figure()
 
@@ -122,18 +96,33 @@ def plot_population_pyramid(df, variable, year):
 
     return fig
 
-# Display the population pyramid chart
-st.title("Population Pyramid Visualization")
-st.write(f"Visualizing: **{variable}** for **{sex}** in **{selected_year}**")
-fig = plot_population_pyramid(df_selected_year, variable, selected_year)
-st.plotly_chart(fig, key="initial_chart")
+# --- Chart 1: Population Projections ---
+st.title("Population Projections")
+st.sidebar.subheader("Chart 1: Population Projections")
 
-# Add the slider below the chart
-selected_year = st.slider(
-    "Select Year", min_value=min(years), max_value=max(years), value=selected_year
-)
+# Inputs for chart 1
+dataset = st.sidebar.radio("Select Dataset", ["2018 Projections", "2022 Projections"])
+sex_chart1 = st.sidebar.selectbox("Select Sex (Chart 1)", ["Males and Females (Combined)", "Persons"])
+years_chart1 = sorted(df["Year"].unique())
+selected_year_chart1 = st.slider("Select Year (Chart 1)", min_value=min(years_chart1), max_value=max(years_chart1))
 
-# Update the chart based on the slider's value
-df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
-fig = plot_population_pyramid(df_selected_year, variable, selected_year)
-st.plotly_chart(fig, key=f"updated_chart_{selected_year}")
+# Filter and display chart 1
+df_chart1 = filter_data(df, sex_chart1, None, dataset=dataset.split()[0])
+df_selected_year_chart1 = df_chart1[df_chart1["Year"] == selected_year_chart1]
+fig_chart1 = plot_population_pyramid(df_selected_year_chart1, f"Population ({dataset})", selected_year_chart1)
+st.plotly_chart(fig_chart1, key="chart1")
+
+# --- Chart 2: Population Difference and Percentage Change ---
+st.title("Population Difference and Percentage Change")
+st.sidebar.subheader("Chart 2: Population Difference and Percentage Change")
+
+# Inputs for chart 2
+variable_chart2 = st.sidebar.radio("Select Variable (Chart 2)", ["Population Difference", "Percentage Difference"])
+sex_chart2 = st.sidebar.selectbox("Select Sex (Chart 2)", ["Males and Females (Combined)", "Persons"])
+selected_year_chart2 = st.slider("Select Year (Chart 2)", min_value=min(years_chart1), max_value=max(years_chart1))
+
+# Filter and display chart 2
+df_chart2 = filter_data(df, sex_chart2, variable_chart2.replace(" ", "_"))
+df_selected_year_chart2 = df_chart2[df_chart2["Year"] == selected_year_chart2]
+fig_chart2 = plot_population_pyramid(df_selected_year_chart2, variable_chart2, selected_year_chart2)
+st.plotly_chart(fig_chart2, key="chart2")
