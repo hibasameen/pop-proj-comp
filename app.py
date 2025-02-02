@@ -11,7 +11,15 @@ def load_data():
 
 df = load_data()
 
-# Debugging: Check unique age groups
+# Define the explicit order of age groups
+age_group_order = [
+    "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
+    "35-39", "40-44", "45-49", "50-54", "55-59", "60-64",
+    "65-69", "70-74", "75-79", "80-84", "85-89", "90-94",
+    "95-99", "100 & over"
+]
+
+# Debugging: Display unique age groups in the dataset
 st.write("Unique Age Groups in Dataset:", df["Age"].unique())
 
 # Sidebar for user input
@@ -35,14 +43,6 @@ variable_mapping = {
     "Percentage Difference": "Percentage_Change"
 }
 
-# Define the explicit order of age groups
-age_group_order = [
-    "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
-    "35-39", "40-44", "45-49", "50-54", "55-59", "60-64",
-    "65-69", "70-74", "75-79", "80-84", "85-89", "90-94",
-    "95-99", "100 & over"
-]
-
 # Filter data based on user input
 @st.cache_data
 def filter_data(df, sex, variable):
@@ -59,15 +59,18 @@ def filter_data(df, sex, variable):
 
     # Ensure all age groups are present
     df_filtered["Age"] = pd.Categorical(df_filtered["Age"], categories=age_group_order, ordered=True)
-    df_filtered = df_filtered.groupby(["Year", "Age"]).sum().reset_index()
 
-    # Fill missing categories with zero
-    for year in df_filtered["Year"].unique():
+    # Add missing age groups with zero values
+    all_years = df_filtered["Year"].unique()
+    filled_data = []
+    for year in all_years:
         for age_group in age_group_order:
             if not ((df_filtered["Year"] == year) & (df_filtered["Age"] == age_group)).any():
-                df_filtered = pd.concat([df_filtered, pd.DataFrame({"Year": [year], "Age": [age_group], "Value": [0]})])
+                filled_data.append({"Year": year, "Age": age_group, "Value": 0})
+    df_filled = pd.concat([df_filtered, pd.DataFrame(filled_data)], ignore_index=True)
+    df_filled = df_filled.groupby(["Year", "Age"]).sum().reset_index()
 
-    return df_filtered
+    return df_filled
 
 df_filtered = filter_data(df, sex, variable)
 
