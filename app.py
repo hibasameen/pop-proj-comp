@@ -152,19 +152,20 @@ def plot_population_pyramid_fixed(df, variable, year, x_axis_range, sex):
     return fig
 
 # --- Title and Instructions ---
-st.title("Population Pyramid Visualizer")
+st.title("Population Projections Visualiser")
 st.markdown("""
-Welcome to the **Population Pyramid Visualizer**!
+Welcome to the **Population Projections Visualiser**!
 
-This app allows you to explore population data and differences between projections. Here's how to use it:
+This app allows you to explore population data and differences between ONS Principal Population Projections between 2018 and 2022. Here's how to use it:
 - **Chart 1**: Select a dataset (2018 or 2022 projections), sex, and year to visualize the population pyramid.
 - **Chart 2**: View the population difference or percentage change by selecting a variable, sex, and year.
+- Select a category on from the legend on the chart to visualise only one category
 - Use the sliders and dropdowns to control the charts interactively.
 """)
 
 # --- Chart 1: Population Projections ---
-st.header("Population Projections")
-st.sidebar.subheader("Chart 1: Population Projections")
+st.header("ONS Principal Population Projections")
+st.sidebar.subheader("Chart 1: Population Projections Pyramid")
 
 # Inputs for chart 1
 dataset = st.sidebar.radio("Select Dataset", ["2018 Projections", "2022 Projections"])
@@ -179,7 +180,7 @@ fig_chart1 = plot_population_pyramid(df_selected_year_chart1, f"Population ({dat
 st.plotly_chart(fig_chart1, key="chart1")
 
 # --- Chart 2: Population Difference and Percentage Change ---
-st.header("Population Difference and Percentage Change")
+st.header("Difference between ONS Principal Population Projections from 2018 and 2022")
 st.sidebar.subheader("Chart 2: Population Difference and Percentage Change")
 
 # Inputs for chart 2 with default values
