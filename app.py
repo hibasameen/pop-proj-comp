@@ -11,6 +11,9 @@ def load_data():
 
 df = load_data()
 
+# Debugging: Check unique age groups
+st.write("Unique Age Groups in Dataset:", df["Age"].unique())
+
 # Sidebar for user input
 st.sidebar.title("Population Pyramid Visualizer")
 sex = st.sidebar.selectbox("Select Sex", ["Males and Females (Combined)", "Persons"])
@@ -53,9 +56,17 @@ def filter_data(df, sex, variable):
         df_male["Value"] = -df_male[col_name]  # Negative for males
         df_female["Value"] = df_female[col_name]  # Positive for females
         df_filtered = pd.concat([df_male, df_female], ignore_index=True)
+
     # Ensure all age groups are present
     df_filtered["Age"] = pd.Categorical(df_filtered["Age"], categories=age_group_order, ordered=True)
-    df_filtered = df_filtered.groupby(["Year", "Age"]).sum().reset_index()  # Fill missing categories
+    df_filtered = df_filtered.groupby(["Year", "Age"]).sum().reset_index()
+
+    # Fill missing categories with zero
+    for year in df_filtered["Year"].unique():
+        for age_group in age_group_order:
+            if not ((df_filtered["Year"] == year) & (df_filtered["Age"] == age_group)).any():
+                df_filtered = pd.concat([df_filtered, pd.DataFrame({"Year": [year], "Age": [age_group], "Value": [0]})])
+
     return df_filtered
 
 df_filtered = filter_data(df, sex, variable)
