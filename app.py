@@ -11,6 +11,9 @@ def load_data():
 
 df = load_data()
 
+# Standardize age group labels
+df["Age"] = df["Age"].str.strip().str.lower().replace({"100 and over": "100 & over"})
+
 # Define the explicit order of age groups
 age_group_order = [
     "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
@@ -18,10 +21,6 @@ age_group_order = [
     "65-69", "70-74", "75-79", "80-84", "85-89", "90-94",
     "95-99", "100 & over"
 ]
-
-# Debugging: Display raw data
-st.write("Raw Dataset Preview:", df.head())
-st.write("Unique Age Groups in Dataset:", df["Age"].unique())
 
 # Sidebar for user input
 st.sidebar.title("Population Pyramid Visualizer")
@@ -75,9 +74,6 @@ def filter_data(df, sex, variable):
 
 df_filtered = filter_data(df, sex, variable)
 
-# Debugging: Display the processed data
-st.write("Processed Dataset Preview:", df_filtered.head())
-
 # Get a list of unique years
 years = sorted(df_filtered["Year"].unique())
 
@@ -86,9 +82,6 @@ selected_year = st.slider("Select Year", min_value=min(years), max_value=max(yea
 
 # Filter data for the selected year
 df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
-
-# Debugging: Display data for the selected year
-st.write(f"Data for Selected Year ({selected_year}):", df_selected_year)
 
 # Create a population pyramid for the selected year
 def plot_population_pyramid(df, variable, year):
