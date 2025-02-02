@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Load data
-@st.cache
+@st.cache_data
 def load_data():
     # Replace with the correct file path
     df = pd.read_csv("data/population_difference_2018_vs_2022.csv")
@@ -33,7 +33,7 @@ variable_mapping = {
 }
 
 # Filter data based on user input
-@st.cache
+@st.cache_data
 def filter_data(df, sex, variable):
     col_name = variable_mapping[variable]
     if sex == "Persons":
@@ -112,7 +112,7 @@ def plot_animated_pyramid(df, variable, sex):
                         dict(
                             label="Pause",
                             method="animate",
-                            args=[[None], dict(frame=dict(duration=0, redraw=False))],  # Fixed closing bracket
+                            args=[[None], dict(frame=dict(duration=0, redraw=False))],
                         ),
                     ],
                 )
