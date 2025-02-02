@@ -48,7 +48,7 @@ df_2022_to_2060['Age Group'] = pd.Categorical(df_2022_to_2060['Age Group'], cate
 df_2022_to_2060 = df_2022_to_2060.sort_values(by=['Sex', 'Year', 'Age Group'])
 
 # Save the final dataset
-output_file = "CleanedPopulationData2022_2060_Sorted.csv"
+output_file = "CleanedPopulationData2022.csv"
 df_2022_to_2060.to_csv(output_file, index=False)
 
 print(f"Processed data saved to {output_file}")
