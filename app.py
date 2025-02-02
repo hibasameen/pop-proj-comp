@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 @st.cache
 def load_data():
     # Replace with the correct file path
-    df = pd.read_csv("path/to/population_difference_2018_vs_2022.csv")
+    df = pd.read_csv("data/population_difference_2018_vs_2022.csv")
     return df
 
 df = load_data()
