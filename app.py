@@ -49,81 +49,57 @@ def filter_data(df, sex, variable):
 
 df_filtered = filter_data(df, sex, variable)
 
-# Create an animated population pyramid
-def plot_animated_pyramid(df, variable, sex):
-    frames = []
-    years = df["Year"].unique()
-    for year in years:
-        df_year = df[df["Year"] == year]
-        frames.append(
-            go.Frame(
-                data=[
-                    go.Bar(
-                        x=df_year[df_year["Value"] < 0]["Value"],  # Males (negative)
-                        y=df_year[df_year["Value"] < 0]["Age"],
-                        orientation="h",
-                        name="Males",
-                        marker=dict(color="blue"),
-                    ),
-                    go.Bar(
-                        x=df_year[df_year["Value"] > 0]["Value"],  # Females (positive)
-                        y=df_year[df_year["Value"] > 0]["Age"],
-                        orientation="h",
-                        name="Females",
-                        marker=dict(color="red"),
-                    )
-                ],
-                name=str(year),
-            )
-        )
+# Get a list of unique years
+years = sorted(df_filtered["Year"].unique())
 
-    fig = go.Figure(
-        data=[
-            go.Bar(
-                x=df[df["Value"] < 0]["Value"],
-                y=df[df["Value"] < 0]["Age"],
-                orientation="h",
-                name="Males",
-                marker=dict(color="blue"),
-            ),
-            go.Bar(
-                x=df[df["Value"] > 0]["Value"],
-                y=df[df["Value"] > 0]["Age"],
-                orientation="h",
-                name="Females",
-                marker=dict(color="red"),
-            )
-        ],
-        layout=go.Layout(
-            title=f"{variable} Over Time",
-            barmode="overlay",
-            xaxis=dict(title=variable),
-            yaxis=dict(title="Age Group", categoryorder="total ascending"),
-            updatemenus=[
-                dict(
-                    type="buttons",
-                    showactive=False,
-                    buttons=[
-                        dict(
-                            label="Play",
-                            method="animate",
-                            args=[None, dict(frame=dict(duration=500, redraw=True), fromcurrent=True)],
-                        ),
-                        dict(
-                            label="Pause",
-                            method="animate",
-                            args=[[None], dict(frame=dict(duration=0, redraw=False))],
-                        ),
-                    ],
-                )
-            ],
-        ),
-        frames=frames,
+# Add a slider for selecting the year
+selected_year = st.slider("Select Year", min_value=min(years), max_value=max(years), value=min(years))
+
+# Filter data for the selected year
+df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
+
+# Create a population pyramid for the selected year
+def plot_population_pyramid(df, variable, year):
+    fig = go.Figure()
+
+    # Add males
+    fig.add_trace(
+        go.Bar(
+            x=df[df["Value"] < 0]["Value"],
+            y=df[df["Value"] < 0]["Age"],
+            orientation="h",
+            name="Males",
+            marker=dict(color="blue"),
+        )
     )
+
+    # Add females
+    fig.add_trace(
+        go.Bar(
+            x=df[df["Value"] > 0]["Value"],
+            y=df[df["Value"] > 0]["Age"],
+            orientation="h",
+            name="Females",
+            marker=dict(color="red"),
+        )
+    )
+
+    # Update layout
+    fig.update_layout(
+        title=f"{variable} - Year {year}",
+        barmode="overlay",
+        xaxis=dict(title=variable),
+        yaxis=dict(
+            title="Age Group",
+            categoryorder="array",
+            categoryarray=df["Age"].unique()[::-1],  # Descending order
+        ),
+    )
+
     return fig
 
-# Display the interactive animation
-st.title("Animated Population Pyramid Visualization")
-st.write(f"Visualizing: **{variable}** for **{sex}**")
-fig = plot_animated_pyramid(df_filtered, variable, sex)
+# Display the population pyramid for the selected year
+st.title("Population Pyramid Visualization")
+st.write(f"Visualizing: **{variable}** for **{sex}** in **{selected_year}**")
+fig = plot_population_pyramid(df_selected_year, variable, selected_year)
 st.plotly_chart(fig)
