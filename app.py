@@ -51,6 +51,7 @@ df_filtered = filter_data(df, sex, variable)
 
 # Get a list of unique years
 years = sorted(df_filtered["Year"].unique())
+age_groups = sorted(df_filtered["Age"].unique(), reverse=True)  # Ensure descending order
 
 # Add a slider for selecting the year
 selected_year = st.slider("Select Year", min_value=min(years), max_value=max(years), value=min(years))
@@ -84,7 +85,7 @@ def plot_population_pyramid(df, variable, year):
         )
     )
 
-    # Update layout
+    # Update layout to display all age groups
     fig.update_layout(
         title=f"{variable} - Year {year}",
         barmode="overlay",
@@ -92,7 +93,9 @@ def plot_population_pyramid(df, variable, year):
         yaxis=dict(
             title="Age Group",
             categoryorder="array",
-            categoryarray=df["Age"].unique()[::-1],  # Descending order
+            categoryarray=age_groups,  # Use the full list of age groups
+            tickmode="array",
+            tickvals=age_groups,  # Show all age groups
         ),
     )
 
