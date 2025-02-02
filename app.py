@@ -76,10 +76,8 @@ df_filtered = filter_data(df, sex, variable)
 # Get a list of unique years
 years = sorted(df_filtered["Year"].unique())
 
-# Add a slider for selecting the year
-selected_year = st.slider("Select Year", min_value=min(years), max_value=max(years), value=min(years))
-
 # Filter data for the selected year
+selected_year = min(years)  # Default to the first year initially
 df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
 
 # Create a population pyramid for the selected year
@@ -124,8 +122,18 @@ def plot_population_pyramid(df, variable, year):
 
     return fig
 
-# Display the population pyramid for the selected year
+# Display the population pyramid chart
 st.title("Population Pyramid Visualization")
 st.write(f"Visualizing: **{variable}** for **{sex}** in **{selected_year}**")
+fig = plot_population_pyramid(df_selected_year, variable, selected_year)
+st.plotly_chart(fig)
+
+# Add the slider below the chart
+selected_year = st.slider(
+    "Select Year", min_value=min(years), max_value=max(years), value=selected_year
+)
+
+# Update the chart based on the slider's value
+df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
 fig = plot_population_pyramid(df_selected_year, variable, selected_year)
 st.plotly_chart(fig)
