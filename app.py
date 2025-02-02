@@ -53,6 +53,9 @@ def filter_data(df, sex, variable):
         df_male["Value"] = -df_male[col_name]  # Negative for males
         df_female["Value"] = df_female[col_name]  # Positive for females
         df_filtered = pd.concat([df_male, df_female], ignore_index=True)
+    # Ensure all age groups are present
+    df_filtered["Age"] = pd.Categorical(df_filtered["Age"], categories=age_group_order, ordered=True)
+    df_filtered = df_filtered.groupby(["Year", "Age"]).sum().reset_index()  # Fill missing categories
     return df_filtered
 
 df_filtered = filter_data(df, sex, variable)
@@ -65,10 +68,6 @@ selected_year = st.slider("Select Year", min_value=min(years), max_value=max(yea
 
 # Filter data for the selected year
 df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
-
-# Ensure all age groups are included
-df_selected_year["Age"] = pd.Categorical(df_selected_year["Age"], categories=age_group_order, ordered=True)
-df_selected_year = df_selected_year.sort_values("Age", ascending=False)  # Descending order
 
 # Create a population pyramid for the selected year
 def plot_population_pyramid(df, variable, year):
@@ -105,6 +104,8 @@ def plot_population_pyramid(df, variable, year):
             title="Age Group",
             categoryorder="array",
             categoryarray=age_group_order,  # Explicit order of age groups
+            tickmode="array",
+            tickvals=age_group_order,  # Force all labels to display
         ),
     )
 
