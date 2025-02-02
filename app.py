@@ -151,8 +151,19 @@ def plot_population_pyramid_fixed(df, variable, year, x_axis_range, sex):
 
     return fig
 
+# --- Title and Instructions ---
+st.title("Population Pyramid Visualizer")
+st.markdown("""
+Welcome to the **Population Pyramid Visualizer**!
+
+This app allows you to explore population data and differences between projections. Here's how to use it:
+- **Chart 1**: Select a dataset (2018 or 2022 projections), sex, and year to visualize the population pyramid.
+- **Chart 2**: View the population difference or percentage change by selecting a variable, sex, and year.
+- Use the sliders and dropdowns to control the charts interactively.
+""")
+
 # --- Chart 1: Population Projections ---
-st.title("Population Projections")
+st.header("Population Projections")
 st.sidebar.subheader("Chart 1: Population Projections")
 
 # Inputs for chart 1
@@ -168,13 +179,26 @@ fig_chart1 = plot_population_pyramid(df_selected_year_chart1, f"Population ({dat
 st.plotly_chart(fig_chart1, key="chart1")
 
 # --- Chart 2: Population Difference and Percentage Change ---
-st.title("Population Difference and Percentage Change")
+st.header("Population Difference and Percentage Change")
 st.sidebar.subheader("Chart 2: Population Difference and Percentage Change")
 
-# Inputs for chart 2
-variable_chart2 = st.sidebar.radio("Select Variable (Chart 2)", ["Population Difference", "Percentage Difference"])
-sex_chart2 = st.sidebar.selectbox("Select Sex (Chart 2)", ["Males and Females (Combined)", "Persons"])
-selected_year_chart2 = st.slider("Select Year (Chart 2)", min_value=min(years_chart1), max_value=max(years_chart1))
+# Inputs for chart 2 with default values
+variable_chart2 = st.sidebar.radio(
+    "Select Variable (Chart 2)",
+    ["Population Difference", "Percentage Difference"],
+    index=0  # Default to "Population Difference"
+)
+sex_chart2 = st.sidebar.selectbox(
+    "Select Sex (Chart 2)",
+    ["Males and Females (Combined)", "Persons"],
+    index=1  # Default to "Persons"
+)
+selected_year_chart2 = st.slider(
+    "Select Year (Chart 2)",
+    min_value=min(years_chart1),
+    max_value=max(years_chart1),
+    value=min(years_chart1)  # Default to the earliest year
+)
 
 # Precompute global x-axis range for the selected variable
 x_axis_range_chart2 = get_global_x_axis_range(df, variable_chart2.replace(" ", "_"))
