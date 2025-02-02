@@ -159,8 +159,7 @@ Welcome to the **Population Projections Visualiser**!
 This app allows you to explore population data and differences between ONS Principal Population Projections between 2018 and 2022. Here's how to use it:
 - **Chart 1**: Select a dataset (2018 or 2022 projections), sex, and year to visualize the population pyramid.
 - **Chart 2**: View the population difference or percentage change by selecting a variable, sex, and year.
-- Select a category on from the legend on the chart to visualise only one category
-- Use the sliders and dropdowns to control the charts interactively.
+- Use the sliders and dropdowns to control the charts interactively, and select a category from the legend on the chart to visualise one category only.
 """)
 
 # --- Chart 1: Population Projections ---
