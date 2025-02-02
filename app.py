@@ -74,7 +74,7 @@ def plot_population_pyramid(df, variable, year):
             y=df[df["Value"] < 0]["Age"],
             orientation="h",
             name="Males",
-            marker=dict(color="green"),  # Custom color for males
+            marker=dict(color="purple"),  # Custom color for males
         )
     )
 
@@ -85,7 +85,7 @@ def plot_population_pyramid(df, variable, year):
             y=df[df["Value"] > 0]["Age"],
             orientation="h",
             name="Females",
-            marker=dict(color="orange"),  # Custom color for females
+            marker=dict(color="teal"),  # Custom color for females
         )
     )
 
