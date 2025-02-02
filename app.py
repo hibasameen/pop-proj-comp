@@ -96,6 +96,52 @@ def plot_population_pyramid(df, variable, year):
 
     return fig
 
+# Function to plot a population pyramid with a fixed x-axis and dynamic labels for Chart 2
+def plot_population_pyramid_fixed(df, variable, year, x_axis_range, sex):
+    fig = go.Figure()
+
+    # Dynamic labels for Persons
+    label_decrease = "Decrease" if sex == "Persons" else "Males"
+    label_increase = "Increase" if sex == "Persons" else "Females"
+
+    # Add decrease (or males)
+    fig.add_trace(
+        go.Bar(
+            x=df[df["Value"] < 0]["Value"],
+            y=df[df["Value"] < 0]["Age"],
+            orientation="h",
+            name=label_decrease,
+            marker=dict(color="blue"),
+        )
+    )
+
+    # Add increase (or females)
+    fig.add_trace(
+        go.Bar(
+            x=df[df["Value"] > 0]["Value"],
+            y=df[df["Value"] > 0]["Age"],
+            orientation="h",
+            name=label_increase,
+            marker=dict(color="red"),
+        )
+    )
+
+    # Update layout to display all age groups and keep x-axis fixed
+    fig.update_layout(
+        title=f"{variable} - Year {year}",
+        barmode="overlay",
+        xaxis=dict(title=variable, range=x_axis_range),  # Fixed x-axis range
+        yaxis=dict(
+            title="Age Group",
+            categoryorder="array",
+            categoryarray=age_group_order,  # Explicit order of age groups
+            tickmode="array",
+            tickvals=age_group_order,  # Force all labels to display
+        ),
+    )
+
+    return fig
+
 # --- Chart 1: Population Projections ---
 st.title("Population Projections")
 st.sidebar.subheader("Chart 1: Population Projections")
@@ -121,8 +167,16 @@ variable_chart2 = st.sidebar.radio("Select Variable (Chart 2)", ["Population Dif
 sex_chart2 = st.sidebar.selectbox("Select Sex (Chart 2)", ["Males and Females (Combined)", "Persons"])
 selected_year_chart2 = st.slider("Select Year (Chart 2)", min_value=min(years_chart1), max_value=max(years_chart1))
 
+# Define fixed x-axis ranges for each variable
+x_axis_ranges = {
+    "Population Difference": [-500000, 500000],  # Example range, adjust as needed
+    "Percentage Difference": [-50, 50]          # Example range, adjust as needed
+}
+
 # Filter and display chart 2
 df_chart2 = filter_data(df, sex_chart2, variable_chart2.replace(" ", "_"))
 df_selected_year_chart2 = df_chart2[df_chart2["Year"] == selected_year_chart2]
-fig_chart2 = plot_population_pyramid(df_selected_year_chart2, variable_chart2, selected_year_chart2)
+fig_chart2 = plot_population_pyramid_fixed(
+    df_selected_year_chart2, variable_chart2, selected_year_chart2, x_axis_ranges[variable_chart2], sex_chart2
+)
 st.plotly_chart(fig_chart2, key="chart2")
