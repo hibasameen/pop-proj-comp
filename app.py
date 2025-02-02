@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 # Load data
 @st.cache
 def load_data():
     # Replace with the correct file path
-    df = pd.read_csv("data/population_difference_2018_vs_2022.csv")
+    df = pd.read_csv("path/to/population_difference_2018_vs_2022.csv")
     return df
 
 df = load_data()
@@ -14,11 +14,6 @@ df = load_data()
 # Sidebar for user input
 st.sidebar.title("Population Pyramid Visualizer")
 sex = st.sidebar.selectbox("Select Sex", ["Males", "Females", "Persons"])
-start_year, end_year = st.sidebar.select_slider(
-    "Select Time Period",
-    options=range(2022, 2061),
-    value=(2022, 2060)
-)
 variable = st.sidebar.selectbox(
     "Select Variable",
     [
@@ -39,33 +34,36 @@ variable_mapping = {
 
 # Filter data based on user input
 @st.cache
-def filter_data(df, sex, start_year, end_year):
-    df_filtered = df[(df["Sex"] == sex.lower()) & (df["Year"].between(start_year, end_year))]
+def filter_data(df, sex, variable):
+    col_name = variable_mapping[variable]
+    df_filtered = df[df["Sex"] == sex.lower()][["Year", "Age", col_name]].copy()
+    df_filtered.rename(columns={col_name: "Value"}, inplace=True)
     return df_filtered
 
-df_filtered = filter_data(df, sex, start_year, end_year)
+df_filtered = filter_data(df, sex, variable)
 
-# Plot population pyramid
-def plot_pyramid(df, year, variable):
-    df_year = df[df["Year"] == year].set_index("Age")
-    col_name = variable_mapping[variable]  # Map user-friendly name to dataset column name
-    if col_name not in df_year.columns:
-        st.error(f"Column '{col_name}' not found in dataset.")
-        return None
-    values = df_year[col_name]
-    colors = ["blue" if v >= 0 else "red" for v in values]
-    fig, ax = plt.subplots(figsize=(8, 10))
-    ax.barh(df_year.index, values, color=colors)
-    ax.set_xlabel(variable)
-    ax.set_title(f"{variable} - {year}")
-    plt.gca().invert_yaxis()
+# Create an animated population pyramid
+def plot_animated_pyramid(df, variable):
+    fig = px.bar(
+        df,
+        x="Value",
+        y="Age",
+        color="Value",
+        animation_frame="Year",
+        orientation="h",
+        title=f"{variable} Over Time",
+        labels={"Value": variable, "Age": "Age Group"},
+        color_continuous_scale=["red", "blue"],  # Red for negative, blue for positive
+    )
+    fig.update_layout(
+        xaxis=dict(title=variable),
+        yaxis=dict(title="Age Group", categoryorder="total ascending"),
+        coloraxis_showscale=False,
+    )
     return fig
 
-# Display title and description
-st.title("Population Pyramid Visualization")
-st.write(f"Visualizing: **{variable}** for **{sex}** from **{start_year}** to **{end_year}**")
-
-# Generate and display plots for each year
-for year in range(start_year, end_year + 1):
-    st.write(f"### Year: {year}")
-    st.pyplot(plot_pyramid(df_filtered, year, variable))
+# Display the interactive animation
+st.title("Interactive Animated Population Pyramid")
+st.write(f"Visualizing: **{variable}** for **{sex}**")
+fig = plot_animated_pyramid(df_filtered, variable)
+st.plotly_chart(fig)
