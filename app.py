@@ -126,7 +126,7 @@ def plot_population_pyramid(df, variable, year):
 st.title("Population Pyramid Visualization")
 st.write(f"Visualizing: **{variable}** for **{sex}** in **{selected_year}**")
 fig = plot_population_pyramid(df_selected_year, variable, selected_year)
-st.plotly_chart(fig)
+st.plotly_chart(fig, key="initial_chart")
 
 # Add the slider below the chart
 selected_year = st.slider(
@@ -136,4 +136,4 @@ selected_year = st.slider(
 # Update the chart based on the slider's value
 df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
 fig = plot_population_pyramid(df_selected_year, variable, selected_year)
-st.plotly_chart(fig)
+st.plotly_chart(fig, key=f"updated_chart_{selected_year}")
