@@ -74,7 +74,7 @@ def plot_population_pyramid(df, variable, year):
             y=df[df["Value"] < 0]["Age"],
             orientation="h",
             name="Males",
-            marker=dict(color="blue"),
+            marker=dict(color="green"),  # Custom color for males
         )
     )
 
@@ -85,7 +85,7 @@ def plot_population_pyramid(df, variable, year):
             y=df[df["Value"] > 0]["Age"],
             orientation="h",
             name="Females",
-            marker=dict(color="red"),
+            marker=dict(color="orange"),  # Custom color for females
         )
     )
 
@@ -120,7 +120,7 @@ def plot_population_pyramid_fixed(df, variable, year, x_axis_range, sex):
             y=df[df["Value"] < 0]["Age"],
             orientation="h",
             name=label_decrease,
-            marker=dict(color="blue"),
+            marker=dict(color="purple"),  # Custom color for decrease/males
         )
     )
 
@@ -131,7 +131,7 @@ def plot_population_pyramid_fixed(df, variable, year, x_axis_range, sex):
             y=df[df["Value"] > 0]["Age"],
             orientation="h",
             name=label_increase,
-            marker=dict(color="red"),
+            marker=dict(color="teal"),  # Custom color for increase/females
         )
     )
 
@@ -150,6 +150,7 @@ def plot_population_pyramid_fixed(df, variable, year, x_axis_range, sex):
     )
 
     return fig
+
 
 # --- Title and Instructions ---
 st.title("Population Projections Visualiser")
