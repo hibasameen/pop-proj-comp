@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 # Load data
 @st.cache_data
 def load_data():
-    # Replace with the correct file path
     df = pd.read_csv("data/population_difference_2018_vs_2022.csv")
     return df
 
@@ -74,6 +73,9 @@ def filter_data(df, sex, variable):
 
 df_filtered = filter_data(df, sex, variable)
 
+# Debugging: Check if "100 & over" exists after filtering
+st.write("Processed Data for '100 & over':", df_filtered[df_filtered["Age"] == "100 & over"])
+
 # Get a list of unique years
 years = sorted(df_filtered["Year"].unique())
 
@@ -82,6 +84,9 @@ selected_year = st.slider("Select Year", min_value=min(years), max_value=max(yea
 
 # Filter data for the selected year
 df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
+
+# Debugging: Check final data for the selected year
+st.write(f"Final Data for {selected_year}:", df_selected_year)
 
 # Create a population pyramid for the selected year
 def plot_population_pyramid(df, variable, year):
