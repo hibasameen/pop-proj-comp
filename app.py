@@ -11,14 +11,14 @@ def load_data():
 df = load_data()
 
 # Standardize age group labels
-df["Age"] = df["Age"].str.strip().str.lower().replace({"100 and over": "100 & over"})
+df["Age"] = df["Age"].str.strip().str.lower().replace({"100 and over": "100&over"})
 
 # Define the explicit order of age groups
 age_group_order = [
     "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
     "35-39", "40-44", "45-49", "50-54", "55-59", "60-64",
     "65-69", "70-74", "75-79", "80-84", "85-89", "90-94",
-    "95-99", "100 & over"
+    "95-99", "100&over"
 ]
 
 # Sidebar for user input
@@ -73,8 +73,8 @@ def filter_data(df, sex, variable):
 
 df_filtered = filter_data(df, sex, variable)
 
-# Debugging: Check if "100 & over" exists after filtering
-st.write("Processed Data for '100 & over':", df_filtered[df_filtered["Age"] == "100 & over"])
+# Debugging: Check if "100&over" exists after filtering
+st.write("Processed Data for '100&over':", df_filtered[df_filtered["Age"] == "100&over"])
 
 # Get a list of unique years
 years = sorted(df_filtered["Year"].unique())
