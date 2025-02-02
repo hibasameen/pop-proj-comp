@@ -19,7 +19,8 @@ age_group_order = [
     "95-99", "100 & over"
 ]
 
-# Debugging: Display unique age groups in the dataset
+# Debugging: Display raw data
+st.write("Raw Dataset Preview:", df.head())
 st.write("Unique Age Groups in Dataset:", df["Age"].unique())
 
 # Sidebar for user input
@@ -57,10 +58,7 @@ def filter_data(df, sex, variable):
         df_female["Value"] = df_female[col_name]  # Positive for females
         df_filtered = pd.concat([df_male, df_female], ignore_index=True)
 
-    # Ensure all age groups are present
-    df_filtered["Age"] = pd.Categorical(df_filtered["Age"], categories=age_group_order, ordered=True)
-
-    # Add missing age groups with zero values
+    # Ensure all age groups are present for each year
     all_years = df_filtered["Year"].unique()
     filled_data = []
     for year in all_years:
@@ -68,11 +66,17 @@ def filter_data(df, sex, variable):
             if not ((df_filtered["Year"] == year) & (df_filtered["Age"] == age_group)).any():
                 filled_data.append({"Year": year, "Age": age_group, "Value": 0})
     df_filled = pd.concat([df_filtered, pd.DataFrame(filled_data)], ignore_index=True)
-    df_filled = df_filled.groupby(["Year", "Age"]).sum().reset_index()
+
+    # Ensure proper sorting
+    df_filled["Age"] = pd.Categorical(df_filled["Age"], categories=age_group_order, ordered=True)
+    df_filled = df_filled.sort_values(["Year", "Age"]).reset_index(drop=True)
 
     return df_filled
 
 df_filtered = filter_data(df, sex, variable)
+
+# Debugging: Display the processed data
+st.write("Processed Dataset Preview:", df_filtered.head())
 
 # Get a list of unique years
 years = sorted(df_filtered["Year"].unique())
@@ -82,6 +86,9 @@ selected_year = st.slider("Select Year", min_value=min(years), max_value=max(yea
 
 # Filter data for the selected year
 df_selected_year = df_filtered[df_filtered["Year"] == selected_year]
+
+# Debugging: Display data for the selected year
+st.write(f"Data for Selected Year ({selected_year}):", df_selected_year)
 
 # Create a population pyramid for the selected year
 def plot_population_pyramid(df, variable, year):
